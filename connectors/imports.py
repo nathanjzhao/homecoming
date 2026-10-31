@@ -103,6 +103,7 @@ AV = {
     "slack": f"Slack workspace export (admin) or slackdump. {DROP}",
     "telegram": f"Telegram Desktop > Settings > Advanced > Export Telegram data, Format: Machine-readable JSON (every chat, or one chat's > Export chat history). {DROP}",
     "zoom": f"Zoom web > Recordings > Cloud recordings > download transcript (.vtt). {DROP}",
+    "granola": f"Granola > Settings > Account management > Export historical data > Generate CSV (emailed, ~hours). {DROP}",
     "notion_export": f"Notion > Settings > General > Export all workspace content (Markdown & CSV, include subpages). {DROP}",
     "imported_documents": f"Any other files (Google Drive via Takeout, Notion 'Export all workspace content'). {DROP}",
 }
@@ -3864,6 +3865,43 @@ def zoom(es, W, used):
                       thread="zoom", thread_name="Zoom transcripts", meta={"file": e.path})
 
 
+GRANOLA_CSV = re.compile(r"(?:^|/)granola-export-[^/]*\.csv$", re.I)
+
+
+def granola(es, W, used):
+    """Granola's "Export historical data" (Settings > Account management): a zip holding granola-export-<date>-NNN.csv,
+    a row a meeting with its AI summary, the notes you typed and the transcript (lines, no speakers or times). One
+    record a meeting; a meeting in two exports is kept once. A long meeting's transcript is longer than csv reads
+    by default, so the limit is raised while these are read."""
+    limit = csv.field_size_limit()
+    csv.field_size_limit(1 << 30)
+    try:
+        for e in es:
+            if not GRANOLA_CSV.search(e.path):
+                continue
+            try:
+                rows = read_csv(e)
+            except (csv.Error, UnicodeDecodeError, *DAMAGED):
+                continue
+            if not rows or not {"document_id", "transcript"} <= set(rows[0]):
+                continue
+            used.add(e.path)
+            w = W("granola")
+            for r in rows:
+                key = rid("granola", r.get("document_id"))
+                parts = [("Summary", r.get("summary")), ("Notes", r.get("notes")), ("Transcript", r.get("transcript"))]
+                text = "\n\n".join(f"{name}:\n{v.strip()}" for name, v in parts if (v or "").strip())
+                if not r.get("document_id") or w.has(key) or not text:
+                    continue
+                w.add(id=key, kind="document", ts=parse_time(r.get("document_created")), author="me",
+                      title=(r.get("document_title") or "").strip() or None, text=text,
+                      thread="granola", thread_name=r.get("workspace_name") or "Granola",
+                      meta={"document_id": r["document_id"], "account": r.get("user_email") or None,
+                            "workspace": r.get("workspace_name") or None, "file": e.path})
+    finally:
+        csv.field_size_limit(limit)
+
+
 NOTION_EXPORT = re.compile(r"Export-[0-9a-f]{8}-[0-9a-f-]{27}")
 NOTION_ID = re.compile(r" ([0-9a-f]{32})(?:_all)?\.(md|csv|html)$")
 NOTION_HTML_TIME = r'property-row-{}(?:(?!</tr>).)*?<time>([^<]+)</time>'  # a property's time in a page of the HTML export
@@ -4609,7 +4647,7 @@ def other_files(es, W, used):
 
 
 PARSERS = [ai_exports, google, youtube, google_chat, discord, meta, x_archive, csv_exports, spotify, whatsapp, slack, telegram, zoom,
-           notion_export, mapped_exports, fitbit_days, other_documents, other_data, other_files]
+           granola, notion_export, mapped_exports, fitbit_days, other_documents, other_data, other_files]
 
 
 def main():

@@ -1648,6 +1648,10 @@ def classify_names(names, peek=None, filename=""):
         return "mailbox"
     if files and all(n.lower().endswith(".vtt") for n in files):
         return "zoom"
+    # Granola's "Export historical data": granola-export-<date>/granola-export-<date>-000.csv, a row a meeting
+    granola = [n for n in files if re.search(r"(^|/)granola-export-[^/]*\.csv$", n, re.I)]
+    if granola and (peek is None or "document_id" in peek(granola[0])[:2000]):
+        return "granola"
     if any(n.rsplit("/", 1)[-1] in ("Timeline.json", "location-history.json") for n in names):
         return "maps_timeline"
     m = META_NAME.match(filename)  # a part of a Meta download with only its photos and videos
@@ -1690,6 +1694,8 @@ def identify(path):
         res["kind"] = "mailbox"
     elif lower.endswith(".vtt"):
         res["kind"] = "zoom"
+    elif re.fullmatch(r"granola-export-.*\.csv", lower):
+        res["kind"] = "granola"
     elif lower in ("timeline.json", "location-history.json"):
         res["kind"] = "maps_timeline"
     elif lower.endswith((".tgz", ".tar.gz", ".tar")):

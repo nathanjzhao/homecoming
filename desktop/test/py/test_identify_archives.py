@@ -81,6 +81,16 @@ class IdentifyArchiveTests(Sandbox):
         self.assertEqual(r["DataExport_2026-01-06"]["kind"], "telegram")
         self.assertIsNone(r["results"]["kind"], "another result.json")
 
+    def test_granola(self):
+        head = "document_id,user_email,document_title,workspace_name,document_created,summary,notes,transcript\n"
+        row = '1b2c3d4e-0000-4000-8000-000000000001,ada@example.com,Standup,Ada\'s workspace,2026-09-21T14:13:20.250Z,"# Notes",,"Hi.\nBye."\n'
+        r = self.identify(self.make("granola-export-2026-10-31.zip", zip_bytes({"granola-export-2026-10-31/granola-export-2026-10-31-000.csv": head + row})),
+                          self.make("granola-export-2026-10-31-000.csv", (head + row).encode()),
+                          self.make("granola-export-names.zip", zip_bytes({"granola-export-names.csv": "Name,Email\nAda,ada@example.com\n"})))
+        self.assertEqual(r["granola-export-2026-10-31.zip"]["kind"], "granola", "the download as Granola sends it")
+        self.assertEqual(r["granola-export-2026-10-31-000.csv"]["kind"], "granola", "its CSV dropped on its own")
+        self.assertIsNone(r["granola-export-names.zip"]["kind"], "named like one, but not one")
+
     def test_zips_in_zips_two_deep_damaged_and_locked(self):
         inner = zip_bytes(CHATGPT)
         locked = patch_headers(inner, flags_on=0x1)

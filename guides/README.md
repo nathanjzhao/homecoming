@@ -43,3 +43,4 @@ taken by guides/capture (see its README) and live beside each page.
 - [Slack](slack/README.md) (no pictures yet)
 - [Telegram](telegram/README.md) (no pictures yet)
 - [Zoom transcripts](zoom/README.md) (no pictures yet)
+- [Granola](granola/README.md) (no pictures yet)

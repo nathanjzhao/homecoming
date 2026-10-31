@@ -455,6 +455,16 @@ export const CATALOG: Source[] = [
       { text: 'Drop the .vtt files here.' },
     ],
   },
+  {
+    id: 'granola', name: 'Granola', group: 'guided', produces: ['granola'], importDir: 'granola', optional: true,
+    blurb: 'Your meetings in Granola: the AI summary, the notes you typed and the transcript.',
+    fileHint: 'granola-export-<date>.zip with granola-export-<date>-000.csv',
+    steps: [
+      { text: 'In the Granola app: Settings → Account management → Export historical data → Generate CSV. Keep every workspace ticked.' },
+      { text: 'Granola emails a link when it\'s ready, usually within a few hours. The link opens notes.granola.ai, so sign in there with the same account.' },
+      { text: 'It downloads granola-export-<date>.zip to Downloads, where the app finds it. Or drop it here.' },
+    ],
+  },
 ];
 
 // Where a service's download is found once it's ready, with no link in hand: its own page has a download button
@@ -465,9 +475,9 @@ export const downloadPage = (src: Source) => (EMAIL_ONLY.has(src.id) ? undefined
 
 export const BY_ID: Record<string, Source> = Object.fromEntries(CATALOG.map((s) => [s.id, s]));
 // Services you set up by hand rather than request (Outlook and other mail through Mail, Maps Timeline from the phone,
-// Slack, Telegram and Zoom from their own export pages): accounts like the rest, chosen with them, each with its page. The other
+// Slack, Telegram, Zoom and Granola from their own export pages): accounts like the rest, chosen with them, each with its page. The other
 // guided sources (a vCard, WhatsApp chats, Messages in iCloud) fill gaps the Mac and iPhone leave: not accounts.
-export const GUIDED_ACCOUNTS = ['other_mail', 'maps_timeline', 'slack', 'telegram', 'zoom'];
+export const GUIDED_ACCOUNTS = ['other_mail', 'maps_timeline', 'slack', 'telegram', 'zoom', 'granola'];
 export const isAccount = (s: { id: string; group: string }) => s.group === 'web' || GUIDED_ACCOUNTS.includes(s.id);
 
 // Domains of the built-in accounts, so a service found in your data that's already here isn't offered again.
@@ -477,7 +487,7 @@ const BUILTIN_DOMAINS: Record<string, string[]> = {
   discord: ['discord.com', 'discordapp.com'], linkedin: ['linkedin.com'], notion: ['notion.so', 'notion.com'],
   chatgpt: ['openai.com', 'chatgpt.com'], claude_ai: ['claude.ai', 'anthropic.com'], x: ['x.com', 'twitter.com'],
   reddit: ['reddit.com', 'redditmail.com'], spotify: ['spotify.com'], whatsapp_chats: ['whatsapp.com'], slack: ['slack.com'], telegram: ['telegram.org', 't.me'],
-  zoom: ['zoom.us'],
+  zoom: ['zoom.us'], granola: ['granola.ai'],
 };
 for (const [id, d] of Object.entries(BUILTIN_DOMAINS)) BY_ID[id].domains = d;
 
@@ -560,7 +570,7 @@ export function reservedFolders(): Set<string> {
 export const KIND_TO_SOURCE: Record<string, string> = {
   google_takeout: 'google_takeout', google_photos_drive: 'google_photos_drive', instagram: 'instagram',
   facebook: 'facebook', discord: 'discord', linkedin: 'linkedin', notion: 'notion', chatgpt: 'chatgpt',
-  claude_ai: 'claude_ai', x: 'x', reddit: 'reddit', spotify: 'spotify', slack: 'slack', telegram: 'telegram', zoom: 'zoom',
+  claude_ai: 'claude_ai', x: 'x', reddit: 'reddit', spotify: 'spotify', slack: 'slack', telegram: 'telegram', zoom: 'zoom', granola: 'granola',
   whatsapp_chats: 'whatsapp_chats', iphone_vcard: 'iphone_vcard', maps_timeline: 'maps_timeline', mailbox: 'other_mail',
 };
 
@@ -582,6 +592,7 @@ export const IMPORT_PARSER_SOURCES: Record<string, string[]> = {
   slack: ['slack'],
   telegram: ['telegram'],
   zoom: ['zoom'],
+  granola: ['granola'],
   notion_export: ['notion'],
   other_documents: ['google_photos_drive', 'notion'],
   // Exports read with a mapping Claude wrote (connectors/mapped_exports.py): services you added. main.ts adds
