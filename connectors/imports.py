@@ -4608,8 +4608,62 @@ def other_files(es, W, used):
                       meta={"files": [path]})
 
 
+SLACK_SHARED = re.compile(r"(?:^|/)(?:__uploads/(F[A-Z0-9]{6,})/([^/]+)|attachments/(F[A-Z0-9]{6,})-([^/]+))(/.*)?$")
+
+
+def slack_shared(es, W, used, take=lambda inside, e: True):
+    """The files slackdump downloaded that no message took: one whose message isn't in the export (it downloads every
+    file it's told of, not only those of the conversations it saves), and what's inside a zip someone shared. A canvas
+    (HTML in Quip's markup, no extension) is read as a document; anything else is one record a shared file with its
+    name, size and, for a zip, the names inside, not its contents: a dataset someone shared isn't yours, row by row."""
+    shared = {}
+    for e in es:
+        m = SLACK_SHARED.search(e.path) if e.path not in used else None
+        if m and take(m.group(5), e):
+            fid, name = m.group(1) or m.group(3), m.group(2) or m.group(4)
+            shared.setdefault((e.origin, fid, name), []).append((m.group(5), e))
+    for (origin, fid, name), files in sorted(shared.items()):
+        for _, e in files:
+            used.add(e.path)
+        top = next((e for inside, e in files if not inside), None)
+        head = ""
+        if top and "." not in name and top.size < 20 << 20:
+            try:
+                with top.open() as f:
+                    head = f.read(64).decode("utf-8", "replace")
+            except DAMAGED:  # listed below like any file, unread
+                pass
+        if head.startswith('<div class="quip'):
+            try:
+                text = html_to_text(top.text())
+            except DAMAGED as x:
+                unreadable(top, x, used)
+                continue
+            W("slack").add(id=f"{origin}:{fid}", kind="document", ts=None, author=None, title=name, text=text,
+                           thread="slack-canvases", thread_name="Slack canvases", meta={"file_id": fid, "canvas": True, "path": top.path})
+            continue
+        inside = sorted(i.lstrip("/") for i, _ in files if i)
+        size = sum(e.size for _, e in files)
+        text = f"File shared in Slack: {name} ({size / 2**20:.1f} MB)" + (f", holding {len(inside)} files: " + ", ".join(inside[:40]) +
+                                                                          (" ..." if len(inside) > 40 else "") if inside else "")
+        W("slack").add(id=f"{origin}:{fid}", kind="file", ts=None, author=None, title=name, text=text,
+                       thread="slack-files", thread_name="Files shared in Slack",
+                       meta={"file_id": fid, "size": size, "inside": inside[:200] or None, "not_read": True})
+
+
+def slack_files(es, W, used):
+    """Before the catch-alls: a shared zip's contents and a shared file that isn't a document or media (data, raw
+    photos, CAD, installers), listed. A document or photo is left to other_documents and other_files."""
+    slack_shared(es, W, used, lambda inside, e: bool(inside) or not (
+        (e.name.lower().endswith(tuple(DOC_EXT)) and e.size <= 60 * 2**20) or e.name.lower().endswith(FILE_EXT)))
+
+
+def slack_files_left(es, W, used):
+    """After the catch-alls: a shared document or photo they couldn't read (too big, no text), listed."""
+    slack_shared(es, W, used)
+
 PARSERS = [ai_exports, google, youtube, google_chat, discord, meta, x_archive, csv_exports, spotify, whatsapp, slack, telegram, zoom,
-           notion_export, mapped_exports, fitbit_days, other_documents, other_data, other_files]
+           notion_export, mapped_exports, fitbit_days, slack_files, other_documents, other_data, other_files, slack_files_left]
 
 
 def main():

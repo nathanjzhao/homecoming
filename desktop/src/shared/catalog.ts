@@ -590,4 +590,8 @@ export const IMPORT_PARSER_SOURCES: Record<string, string[]> = {
   // Catch-alls: structured files and media in any export that no parser above read (imports.py).
   other_data: ['google_takeout', 'discord', 'x', 'linkedin', 'instagram', 'facebook', 'notion'],
   other_files: ['google_takeout', 'discord', 'x', 'instagram', 'facebook', 'notion'],
+  // What slackdump downloaded that no message links: a shared zip's contents and data listed, a canvas read; after the
+  // catch-alls, what they couldn't read listed.
+  slack_files: ['slack'],
+  slack_files_left: ['slack'],
 };

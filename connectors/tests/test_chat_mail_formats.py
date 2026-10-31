@@ -217,6 +217,34 @@ class SlackTests(Base):
                 self.assertEqual((f if f.is_absolute() else self.corpus / f).read_bytes(), want, "copied out of the export")
         self.assertNotIn("__uploads/F0AAAAAAA/pier.jpg", self.unclaimed())
 
+    def test_files_no_message_shares_a_shared_zip_and_a_canvas(self):
+        """slackdump downloads files whose messages aren't in the export (a real one had 390 such, 4.6 GB): a zip's
+        contents are listed, not read row by row; a canvas is read; a photo is still copied; what no reader manages is listed."""
+        inner = io.BytesIO()
+        with zipfile.ZipFile(inner, "w") as z:
+            z.writestr("rows.csv", "zip,city\n02134,Allston\n60614,Chicago\n")
+            z.writestr("pic.jpg", b"\xff\xd8\xff\xe0 made-up")
+        self.zip("slack/slackdump_20260106_120000.zip", {
+            "users.json": USERS, "channels.json": [{"id": "C01", "name": "general", "members": ["U01", "U02"]}],
+            "general/2026-01-05.json": [say(0, "U02", "morning")],
+            "__uploads/F0DDDDDDD/dataset.zip": inner.getvalue(),
+            "__uploads/F0EEEEEEE/Canvas": '<div class="quip-canvas-content"><h1>Plan</h1><p class="line">Ship on Friday</p></div>',
+            "__uploads/F0FFFFFFF/IMG_0001.RW2": b"raw sensor data",
+            "__uploads/F0GGGGGGG/beach.jpg": b"\xff\xd8\xff\xe0 made-up beach",
+            "__uploads/F0HHHHHHH/scan.pdf": b"not a pdf at all"})
+        self.run_import()
+        got = {r["meta"]["file_id"]: r for r in self.of("slack") if r.get("thread") in ("slack-files", "slack-canvases")}
+        self.assertEqual(got["F0DDDDDDD"]["meta"]["inside"], ["pic.jpg", "rows.csv"])
+        self.assertTrue(got["F0DDDDDDD"]["meta"]["not_read"])
+        self.assertEqual(self.of("slack_other"), [], "someone's dataset isn't read into records")
+        self.assertEqual((got["F0EEEEEEE"]["kind"], got["F0EEEEEEE"]["title"]), ("document", "Canvas"))
+        self.assertIn("Ship on Friday", got["F0EEEEEEE"]["text"])
+        self.assertEqual(got["F0FFFFFFF"]["title"], "IMG_0001.RW2")
+        self.assertNotIn("F0GGGGGGG", got, "a photo is the catch-all's: copied, not only listed")
+        self.assertEqual([r["title"] for r in self.of("slack_files")], ["beach.jpg"])
+        self.assertEqual(got["F0HHHHHHH"]["title"], "scan.pdf", "a document no reader could read is listed after them")
+        self.assertEqual(self.unclaimed(), set())
+
     def test_slackdumps_dump_a_file_a_conversation(self):
         first = say(0, "U02", "who's driving?", thread_ts=ts(0), reply_count=1)
         first["slackdump_thread_replies"] = [dict(first), say(1, "U01", "I can", thread_ts=ts(0))]
