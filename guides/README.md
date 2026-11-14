@@ -4,6 +4,8 @@ How to get each kind of data to Homecoming: the same steps the app shows, with a
 Written from shared/catalog.ts by desktop/scripts/guides.ts; edit the steps there, not here. Pictures and recordings are
 taken by guides/capture (see its README) and live beside each page.
 
+An agent following these for someone tells them each site before it opens it, and opens nothing a page doesn't name. Homecoming itself reads the files on this Mac and what people bring back; it reaches the internet only for what is switched on in Settings, Network, and for nothing at all when Use the internet is off.
+
 ## Before you start
 
 - [Full Disk Access](fda/README.md) (no pictures yet)

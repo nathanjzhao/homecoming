@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
 import { CATALOG } from '../../src/shared/catalog.ts';
-import { pages } from '../../scripts/guides.ts';
+import { agentNote, pages } from '../../scripts/guides.ts';
 
 const GUIDES = path.resolve(import.meta.dirname, '../../../guides');
 
@@ -21,5 +21,14 @@ test('every picture and recording a source names is in its guide folder', () => 
   for (const s of CATALOG) {
     const named = [...(s.steps ?? []).map((x) => x.shot), s.clip].filter((x): x is string => !!x);
     for (const f of named) assert.ok(fs.existsSync(path.join(GUIDES, s.id, f)), `${s.id}: guides/${s.id}/${f} is missing`);
+  }
+});
+
+test('every page that sends you to a website tells an agent to say which one before it opens it', () => {
+  const all = pages();
+  for (const s of CATALOG.filter((x) => x.steps?.length && x.url)) {
+    const text = all[`${s.id}/README.md`];
+    assert.ok(text.includes(agentNote(s.url!)), `${s.id}: no note for agents`);
+    assert.ok(text.includes(new URL(s.url!).host), `${s.id}: the note doesn't name ${new URL(s.url!).host}`);
   }
 });

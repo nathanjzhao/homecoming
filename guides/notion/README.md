@@ -4,6 +4,8 @@ Every page and database in your workspace.
 
 Where: https://app.notion.com/
 
+An agent doing this for you says which site it will open (app.notion.com) before opening it, and opens no other. Homecoming reads only the file you bring back.
+
 1. Sign in to Notion.
 
 2. Settings → General → Export → Workspace content: Export.

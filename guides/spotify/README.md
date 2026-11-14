@@ -4,6 +4,8 @@ Every song, podcast and audiobook you ever played, your playlists, library and s
 
 Where: https://www.spotify.com/account/privacy/
 
+An agent doing this for you says which site it will open (www.spotify.com) before opening it, and opens no other. Homecoming reads only the file you bring back.
+
 1. Sign in to Spotify.
 
 2. Tick both Account data and Extended streaming history.
