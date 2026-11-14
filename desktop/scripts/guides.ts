@@ -14,9 +14,14 @@ const GROUPS: [Source['group'], string][] = [['setup', 'Before you start'], ['ma
 
 const hours = (h: number) => (h < 24 ? `${h} hour${h === 1 ? '' : 's'}` : `${Math.round(h / 24)} day${h < 48 ? '' : 's'}`);
 
+// Said on every page that sends you to a website: an agent following it says where it's going before it goes.
+export const agentNote = (url: string) =>
+  `An agent doing this for you says which site it will open (${new URL(url).host}) before opening it, and opens no other. ` +
+  'Homecoming reads only the file you bring back.';
+
 export function page(s: Source): string {
   const out = [`# ${s.name}`, '', s.blurb, ''];
-  if (s.url) out.push(`Where: ${s.url}`, '');
+  if (s.url) out.push(`Where: ${s.url}`, '', agentNote(s.url), '');
   if (s.clip) out.push(`<video src="${s.clip}" controls muted width="640"></video>`, '');
   s.steps!.forEach((st, i) => {
     out.push(`${i + 1}. ${st.text}`);
@@ -34,7 +39,10 @@ export function page(s: Source): string {
 export function index(): string {
   const out = ['# Export guides', '', 'How to get each kind of data to Homecoming: the same steps the app shows, with a picture where the page has something to find.',
     'Written from shared/catalog.ts by desktop/scripts/guides.ts; edit the steps there, not here. Pictures and recordings are',
-    'taken by guides/capture (see its README) and live beside each page.', ''];
+    'taken by guides/capture (see its README) and live beside each page.', '',
+    'An agent following these for someone tells them each site before it opens it, and opens nothing a page doesn\'t name. '
+    + 'Homecoming itself reads the files on this Mac and what people bring back; it reaches the internet only for what is '
+    + 'switched on in Settings, Network, and for nothing at all when Use the internet is off.', ''];
   for (const [g, title] of GROUPS) {
     const here = CATALOG.filter((s) => s.group === g && s.steps?.length);
     if (!here.length) continue;

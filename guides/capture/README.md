@@ -1,6 +1,6 @@
 # Capture export-guide pictures
 
-`capture.mjs` opens each service in a dedicated, persistent Google Chrome profile and follows the safe actions in `shots.json`. It writes PNG screenshots and WebM recordings beside the matching guide: `guides/<source id>/`.
+`capture.mjs` opens each service in a dedicated, persistent Google Chrome profile and follows the safe actions in `shots.json`. It writes PNG screenshots and WebM recordings beside the matching guide: `guides/<source id>/`. It goes online: to each service's site in `shots.json` (`--only` narrows it to those named) and nowhere else. It's a tool for whoever keeps the guides' pictures up to date. The app never runs it.
 
 ## Run it
 

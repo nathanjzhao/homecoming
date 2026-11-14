@@ -4,6 +4,8 @@ Your posts (deleted ones too), likes, direct messages and Grok chats.
 
 Where: https://x.com/settings/download_your_data
 
+An agent doing this for you says which site it will open (x.com) before opening it, and opens no other. Homecoming reads only the file you bring back.
+
 1. Sign in to X in your browser.
 
 2. Settings → Your account → Download an archive of your data. Enter your password and the code X sends.

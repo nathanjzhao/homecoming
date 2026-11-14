@@ -4,6 +4,8 @@ Gmail, search and YouTube history, Chrome, Calendar, Contacts, Keep, Tasks, Goog
 
 Where: https://takeout.google.com/
 
+An agent doing this for you says which site it will open (takeout.google.com) before opening it, and opens no other. Homecoming reads only the file you bring back.
+
 1. Sign in with your own Google account. Check the name in the top right.
 
 2. Click "Deselect all", then tick Calendar, Chrome, Contacts, Gemini, Google Chat, Keep, Mail, Maps, Maps (your places), My Activity, Saved, Tasks, and YouTube and YouTube Music.

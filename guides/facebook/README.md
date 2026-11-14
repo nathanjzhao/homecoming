@@ -4,6 +4,8 @@ Messenger conversations (both sides), friends, posts, groups, events and searche
 
 Where: https://accountscenter.facebook.com/info_and_permissions/dyi/
 
+An agent doing this for you says which site it will open (accountscenter.facebook.com) before opening it, and opens no other. Homecoming reads only the file you bring back.
+
 1. Sign in to Facebook.
 
 2. Export your information → Create export → pick your Facebook profile → Export to device.

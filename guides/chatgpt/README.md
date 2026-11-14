@@ -4,6 +4,8 @@ Every ChatGPT conversation.
 
 Where: https://chatgpt.com/settings/data-controls
 
+An agent doing this for you says which site it will open (chatgpt.com) before opening it, and opens no other. Homecoming reads only the file you bring back.
+
 1. Sign in to your own ChatGPT account.
 
 2. Settings → Data controls → Export data → Confirm export.

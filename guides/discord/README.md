@@ -4,6 +4,8 @@ Every message you sent in DMs, group DMs and servers.
 
 Where: https://discord.com/app
 
+An agent doing this for you says which site it will open (discord.com) before opening it, and opens no other. Homecoming reads only the file you bring back.
+
 1. Sign in. Check it is your main account, not an auto-named secondary one.
 
 2. If Discord asks you to verify your email, do that first. Unverified accounts can't export.
