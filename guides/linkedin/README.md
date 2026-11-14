@@ -4,6 +4,8 @@ Connections, positions, searches, reactions, invitations and LinkedIn's inferenc
 
 Where: https://www.linkedin.com/mypreferences/d/download-my-data
 
+An agent doing this for you says which site it will open (www.linkedin.com) before opening it, and opens no other. Homecoming reads only the file you bring back.
+
 1. Sign in to LinkedIn.
 
 2. Choose "Download larger data archive", then Request archive.

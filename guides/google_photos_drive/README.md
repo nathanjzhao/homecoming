@@ -4,6 +4,8 @@ Photo times, places and people from Google Photos, and the text of your Drive fi
 
 Where: https://takeout.google.com/
 
+An agent doing this for you says which site it will open (takeout.google.com) before opening it, and opens no other. Homecoming reads only the file you bring back.
+
 1. Create a separate export with only Google Photos and Drive ticked.
    This can run to hundreds of GB. Check free space first.
 

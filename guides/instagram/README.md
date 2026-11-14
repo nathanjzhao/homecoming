@@ -4,6 +4,8 @@ Direct messages (both sides), likes, saves, follows, comments and searches.
 
 Where: https://accountscenter.instagram.com/info_and_permissions/dyi/
 
+An agent doing this for you says which site it will open (accountscenter.instagram.com) before opening it, and opens no other. Homecoming reads only the file you bring back.
+
 1. Sign in to Instagram.
 
 2. Export your information → Create export → pick your Instagram account → Export to device.

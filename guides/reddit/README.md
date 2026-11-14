@@ -4,6 +4,8 @@ Your posts, comments, votes, saved items and messages.
 
 Where: https://www.reddit.com/settings/data-request
 
+An agent doing this for you says which site it will open (www.reddit.com) before opening it, and opens no other. Homecoming reads only the file you bring back.
+
 1. Sign in to Reddit.
 
 2. Under "What type of request is it?", pick the privacy law for where you live.
