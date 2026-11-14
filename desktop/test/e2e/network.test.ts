@@ -70,3 +70,13 @@ test('back online: network.json follows and the look for updates goes out', asyn
   assert.ok(asked >= 1, 'the look went out once the internet was back on');
   assert.deepEqual(run.errors, []);
 });
+
+test('Other machines: off until switched on, and its switch is what network.json says', async () => {
+  const sw = run.page.locator('[data-testid=toggle-network-machines]');
+  assert.equal(await sw.getAttribute('aria-checked'), 'false');
+  await sw.click();
+  if (process.env.UMP_SHOT) await run.page.locator('[data-testid=general-network]').screenshot({ path: process.env.UMP_SHOT });
+  await until(run.page, 'machines on', () => readJson(path.join(sb.corpus, 'network.json')).sources?.machines === true);
+  await sw.click();
+  await until(run.page, 'machines off', () => !readJson(path.join(sb.corpus, 'network.json')).sources?.machines);
+});
