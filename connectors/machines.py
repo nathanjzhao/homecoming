@@ -1,4 +1,4 @@
-"""Your other machines: what the same connectors find on the Macs and Linux machines you reach over ssh (a Mac mini,
+"""Your other machines (off until "Other machines" is switched on in Network: it goes over ssh): what the same connectors find on the Macs and Linux machines you reach over ssh (a Mac mini,
 a cloud workstation, a server), kept beside this Mac's and marked with the machine each came from.
 
 Which machines, by themselves: your own Macs and Linux machines on Tailscale (not one shared with you, nor a
@@ -30,7 +30,7 @@ import tarfile
 import time
 from pathlib import Path
 
-from common import CORPUS, HOME, NORM, RAW, read_manifest, tailscale_devices, tailscale_status, write_manifest
+from common import CORPUS, HOME, NORM, RAW, online, read_manifest, tailscale_devices, tailscale_status, write_manifest
 
 HERE = Path(__file__).resolve().parent
 CONFIG = CORPUS / "machines.json"
@@ -186,6 +186,10 @@ def find(with_ssh=False, also=()):
     for m in found.values():
         if m["via"] == "tailscale" and not m.get("online"):
             m["why"] = "offline"
+    if not online("machines"):  # listed from Tailscale's and the ssh config's own state; nothing is sent to any of them
+        for m in found.values():
+            m.setdefault("why", "not tried: Other machines is off in Network")
+        return sorted(found.values(), key=lambda m: m["name"])
     to_check = [n for n, m in found.items() if (m["via"] in ("tailscale", "VM on this Mac") and m.get("online", True)) or with_ssh or n in also]
     with concurrent.futures.ThreadPoolExecutor(16) as pool:
         for name, res in zip(to_check, pool.map(check, to_check)):
@@ -376,6 +380,11 @@ AT_ONCE = int(os.environ.get("UMP_MACHINES_AT_ONCE") or 3)
 def main():
     manifest = read_manifest()
     before = (manifest.get("machines") or {}).get("machines") or {}
+    if not online("machines"):  # nothing goes over ssh; what earlier reads brought stays
+        print("[machines] off in Network: no machine read", flush=True)
+        manifest["machines"] = {**(manifest.get("machines") or {}), "off": True}
+        write_manifest(manifest)
+        return
     entry = {"avenue": __doc__.split("\n\n")[0], "machines": {m: v for m, v in before.items() if m not in chosen()}}
     # Read there a few at a time (each is mostly waiting on that machine); merged here one at a time, as each comes
     # back, so two machines with the same message don't both keep it.
