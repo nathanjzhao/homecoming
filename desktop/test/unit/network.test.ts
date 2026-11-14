@@ -35,3 +35,16 @@ test('a local model stays local, but a remote localUrl is cloud traffic', () => 
   assert.deepEqual(agentNeed(base('http://192.168.1.2:11434/v1', true), 'local'), { kind: 'offline' });
   assert.deepEqual(agentNeed(base('http://192.168.1.2:11434/v1', false), 'local'), { kind: 'local-address', url: 'http://192.168.1.2:11434/v1' });
 });
+
+// Nothing goes online unlisted: every source a connector asks online("<id>") for is a row in Settings, Network (with its
+// switch), and every row is one a connector really asks for.
+test('the Network list and the connectors that go online are the same', async () => {
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const dir = path.resolve(import.meta.dirname, '../../../connectors');
+  const asked = new Set<string>();
+  for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.py'))) {
+    for (const m of fs.readFileSync(path.join(dir, f), 'utf8').matchAll(/\b(?:need_)?online\(\s*["']([\w-]+)["']/g)) asked.add(m[1]);
+  }
+  assert.deepEqual([...asked].sort(), NETWORK_SOURCES.map((s) => s.id).sort());
+});
