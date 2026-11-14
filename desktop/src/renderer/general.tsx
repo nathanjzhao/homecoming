@@ -21,7 +21,7 @@ const set = (patch: Partial<Settings>) => void api.settings(patch);
 function askHost(snap: Snapshot): string {
   const { provider, localUrl } = snap.ask.settings;
   if (provider === 'local') return isLocalAddress(localUrl) ? 'a model on this Mac' : hostOf(localUrl);
-  return ({ 'claude-code': 'claude.ai', anthropic: 'api.anthropic.com', codex: 'chatgpt.com', openai: 'api.openai.com' } as Record<string, string>)[provider] ?? 'the chosen provider';
+  return ({ 'claude-code': 'api.anthropic.com', anthropic: 'api.anthropic.com', codex: 'chatgpt.com', openai: 'api.openai.com' } as Record<string, string>)[provider] ?? 'the chosen provider';
 }
 
 export function GeneralPage({ snap, toolbar, onAssistant, onExport, onWhatsNew, onUpdate }: { snap: Snapshot; toolbar?: ReactNode; onAssistant: () => void;
@@ -41,8 +41,7 @@ export function GeneralPage({ snap, toolbar, onAssistant, onExport, onWhatsNew, 
 
           <Group title="Network" testId="general-network"
             footer="When it's off, Homecoming stops looking for updates, Ask with a cloud AI, Do It for Me, and the sources below. Everything else Homecoming reads is files on this Mac.">
-            <GroupRow icon={<GlyphTile glyph="globe" color="blue" />} title="Use the internet" chevron={false}
-              subtitle={offline ? 'Off' : 'On'} testId="network-internet"
+            <GroupRow icon={<GlyphTile glyph="globe" color="blue" />} title="Use the internet" chevron={false} testId="network-internet"
               trailing={<Toggle checked={!offline} onChange={(v) => set({ offline: !v })} label="Use the internet" testId="toggle-network" />} />
             <GroupRow icon={<GlyphTile glyph="sync" color="blue" />} title="Look for updates" subtitle="raw.githubusercontent.com" chevron={false}
               style={offline ? { opacity: 0.45 } : undefined} testId="network-updates" />
