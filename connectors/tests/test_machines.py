@@ -23,6 +23,7 @@ class MachinesTests(unittest.TestCase):
         self.home, self.box, self.corpus, self.bin, self.tmp = (self.root / d for d in ("home", "box", "corpus", "bin", "boxtmp"))
         for d in (self.home, self.box, self.corpus, self.bin, self.tmp):
             d.mkdir()
+        (self.corpus / "network.json").write_text('{"sources": {"machines": true}}')  # switched on in Network
         # A command typed on both (the same history through a synced dotfile) and one only on the box
         (self.home / ".zsh_history").write_text(": 1767261600:0;git status\n")
         (self.box / ".zsh_history").write_text(": 1767261600:0;git status\n: 1767265200:0;make train\n")
@@ -63,6 +64,20 @@ esac""")
     def records(self, name):
         f = self.corpus / "normalized" / f"{name}.jsonl"
         return [json.loads(l) for l in f.read_text().splitlines()] if f.exists() else []
+
+    def test_off_in_network_nothing_goes_over_ssh(self):
+        self.py("import shell_history; shell_history.main()")
+        self.py("import machines; machines.main()", UMP_MACHINES="box")
+        before = self.records("shell_history@box")
+        self.assertTrue(before)
+        (self.root / "ssh.log").unlink()
+        for off in ('{"sources": {}}', '{"offline": true, "sources": {"machines": true}}'):
+            (self.corpus / "network.json").write_text(off)
+            self.py("import machines; machines.main()", UMP_MACHINES="box")
+            out = self.py(None, "machines.py", "--find", "--ssh")
+            self.assertFalse((self.root / "ssh.log").exists(), "a machine was reached with Other machines off")
+            self.assertIn("off in Network", out)
+            self.assertEqual(self.records("shell_history@box"), before)  # what an earlier read brought stays
 
     def test_a_machine_read_beside_this_mac(self):
         self.py("import shell_history; shell_history.main()")
