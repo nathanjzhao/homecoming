@@ -1,7 +1,10 @@
 import type { Settings } from './types.ts';
 
 // Connectors from other changes add their internet-facing sources here.
-export const NETWORK_SOURCES: { id: string; name: string; hosts: string[]; what: string }[] = [];
+export const NETWORK_SOURCES: { id: string; name: string; hosts: string[]; what: string }[] = [
+  { id: 'machines', name: 'Other machines', hosts: ['your Tailscale machines and VMs, over ssh'],
+    what: 'Reads the same sources on your other Macs and Linux machines (connectors/machines.py).' },
+];
 
 export function networkFile(settings: Pick<Settings, 'offline' | 'networkOn'>): { offline: boolean; sources: Record<string, true> } {
   const allowed = new Set(NETWORK_SOURCES.map((source) => source.id));
